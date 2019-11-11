@@ -67,7 +67,9 @@
 
 #define DEVICE_TYPE					'B'			//设备类型
 
-#define RELEASE_VERSION							//正式发布版本
+#define CHINA_VERSION							//国内版本
+//#define THAILAND_VERSION						//泰国版本
+//#define DEBUG_VERSION							//测试版本
 
 //#define DEBUG_LOG								//是否打印调试信息
 
@@ -101,7 +103,8 @@
 
 #define IMEI_LEN					15
 #define IMSI_LEN					15
-#define ICCID_LEN					20
+#define ICCID19_LEN					19
+#define ICCID20_LEN					20
 
 
 
@@ -403,6 +406,7 @@ extern EventRecordList_S EventRecordList;
 
 /***************************其他*****************************/
 extern u8 GetTimeOK;								//成功获取时间标志
+extern u8 RefreshStrategy;							//刷新策略列表
 
 extern DeviceConfigPara_S DeviceConfigPara;			//设备基本信息
 extern LampsSwitchProject_S LampsSwitchProject;		//年表

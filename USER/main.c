@@ -18,6 +18,7 @@ u8 eepbuf[256];
 u16 cnt = 0;
 u8 led_s = 0;
 RCC_ClocksTypeDef RCC_Clocks;
+//u16 days = 0;
 
 int main(void)
 {
@@ -44,7 +45,9 @@ int main(void)
 	UART4_Init(9600);
 
 	__set_PRIMASK(0);	//开启全局中断
-	
+
+//	days = get_dates_diff(7,15,9,10);
+
 //	FrameWareState.state 			= FIRMWARE_FREE;
 //	WriteFrameWareStateToEeprom();	//将固件升级状态写入EEPROM
 

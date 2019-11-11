@@ -60,6 +60,7 @@ EventRecordList_S EventRecordList;
 
 /***************************其他*****************************/
 u8 GetTimeOK = 0;							//成功获取时间标志
+u8 RefreshStrategy = 0;						//刷新策略列表
 
 DeviceConfigPara_S DeviceConfigPara;		//设备基本信息
 LampsSwitchProject_S LampsSwitchProject;	//年表
@@ -1147,7 +1148,7 @@ u8 ReadPeakStaggerTime(void)
 	}
 	else
 	{
-		RandomPeakStaggerTime = 60;
+		RandomPeakStaggerTime = 900;
 		FixedPeakStaggerTime = 0;
 	}
 
@@ -1608,9 +1609,11 @@ u8 ReadServerIP(void)
 
 		memset(ServerIP,0,16);
 
-#ifdef RELEASE_VERSION
+#if defined(CHINA_VERSION)
 		sprintf((char *)ServerIP, "117.60.157.137");
-#else
+#elif defined(THAILAND_VERSION)
+		sprintf((char *)ServerIP, "159.138.237.223");
+#elif defined(DEBUG_VERSION)
 		sprintf((char *)ServerIP, "180.101.147.115");
 #endif
 	}

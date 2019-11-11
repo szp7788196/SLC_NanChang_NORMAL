@@ -56,9 +56,9 @@ void vTaskSENSOR(void *pvParameters)
 			delay_ms(100);
 			InputFreq 		= Att7053cGetVoltageFreq();
 			delay_ms(100);
-			InputPowerP 	= Att7053cGetChannel1PowerP();
+			InputPowerP 	= 0.0f - Att7053cGetChannel1PowerP();
 			delay_ms(100);
-			InputPowerQ 	= Att7053cGetChannel1PowerQ();
+			InputPowerQ 	= 0.0f - Att7053cGetChannel1PowerQ();
 			delay_ms(100);
 			InputPowerS 	= Att7053cGetChannel1PowerS();
 			delay_ms(100);
