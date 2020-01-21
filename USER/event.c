@@ -8,7 +8,7 @@ void RecordEventsECx(u8 ecx,u8 len,u8 *msg)
 	u16 crc_cal = 0;
 	u16 add_pos = 0;
 	u8 buf[24];
-	
+
 	if(xSchedulerRunning == 1)
 	{
 		xSemaphoreTake(xMutex_EVENT_RECORD, portMAX_DELAY);
@@ -42,7 +42,7 @@ void RecordEventsECx(u8 ecx,u8 len,u8 *msg)
 	EventRecordList.ec1 ++;				//更新事件计数器
 
 	WriteDataFromMemoryToEeprom(&EventRecordList.ec1,EC1_ADD, 1);
-	
+
 	EventRecordList.important_event_flag ++;
 
 	if(xSchedulerRunning == 1)
@@ -59,11 +59,11 @@ void CheckEventsEC15(u8 light_level)
 	static u8 state_change = 0;
 	static u8 first = 1;
 	u8 buf[6];
-	
+
 	if(first == 1)
 	{
 		first = 0;
-		
+
 		cnt = GetSysTick1s();
 		mirror_level = light_level;
 	}
@@ -92,15 +92,15 @@ void CheckEventsEC15(u8 light_level)
 					{
 						buf[0] = 0x00;		//开灯成功数
 						buf[1] = 0x00;
-						buf[2] = 0x01;		//开灯失败数
-						buf[3] = 0x00;
+						buf[2] = 0x00;		//开灯失败数
+						buf[3] = 0x01;
 						buf[4] = 0x00;		//失败灯号
 						buf[5] = 0x01;
 					}
 					else												//开灯正常
 					{
-						buf[0] = 0x01;		//开灯成功数
-						buf[1] = 0x00;
+						buf[0] = 0x00;		//开灯成功数
+						buf[1] = 0x01;
 						buf[2] = 0x00;		//开灯失败数
 						buf[3] = 0x00;
 						buf[4] = 0x00;		//失败灯号
@@ -108,10 +108,10 @@ void CheckEventsEC15(u8 light_level)
 					}
 
 					RecordEventsECx(EVENT_ERC15,6,buf);
-					
+
 				}
 			}
-			
+
 			mirror_level = light_level;
 		}
 	}
@@ -130,11 +130,11 @@ void CheckEventsEC16(u8 light_level)
 	static u8 state_change = 0;
 	static u8 first = 1;
 	u8 buf[6];
-	
+
 	if(first == 1)
 	{
 		first = 0;
-		
+
 		cnt = GetSysTick1s();
 		mirror_level = light_level;
 	}
@@ -163,15 +163,15 @@ void CheckEventsEC16(u8 light_level)
 					{
 						buf[0] = 0x00;		//开灯成功数
 						buf[1] = 0x00;
-						buf[2] = 0x01;		//开灯失败数
-						buf[3] = 0x00;
+						buf[2] = 0x00;		//开灯失败数
+						buf[3] = 0x01;
 						buf[4] = 0x00;		//失败灯号
 						buf[5] = 0x01;
 					}
 					else												//关灯正常
 					{
-						buf[0] = 0x01;		//开灯成功数
-						buf[1] = 0x00;
+						buf[0] = 0x00;		//开灯成功数
+						buf[1] = 0x01;
 						buf[2] = 0x00;		//开灯失败数
 						buf[3] = 0x00;
 						buf[4] = 0x00;		//失败灯号
@@ -326,7 +326,7 @@ void CheckEventsEC18(u8 light_level)
 }
 
 //检测单灯电流过大记录
-void CheckEventsEC19(u8 light_level)
+void CheckEventsEC19(u8 light_level,u8 get_e_para_ok)
 {
 	static u8 mirror_level = 0;
 	static time_t time_cnt = 0;
@@ -334,13 +334,18 @@ void CheckEventsEC19(u8 light_level)
 	static s8 cnt = 0;
 	static u8 first = 1;
 	u8 buf[7];
-	
+
 	if(first == 1)
 	{
 		first = 0;
-		
+
 		time_cnt = GetSysTick1s();
 		mirror_level = light_level;
+	}
+
+	if(light_level == 0)
+	{
+		return;
 	}
 
 	if(mirror_level != light_level)		//单灯状态有变化
@@ -352,7 +357,7 @@ void CheckEventsEC19(u8 light_level)
 		mirror_level = light_level;
 	}
 
-	if(GetSysTick1s() - time_cnt >= EventDetectConf.current_detect_delay * 60)	//等待一段时间，计算电流和电压
+	if((GetSysTick1s() - time_cnt >= EventDetectConf.current_detect_delay * 60) && get_e_para_ok == 1)	//等待一段时间，计算电流和电压
 	{
 		if(occur == 0)
 		{
@@ -424,7 +429,7 @@ void CheckEventsEC19(u8 light_level)
 }
 
 //检测单灯电流过小记录
-void CheckEventsEC20(u8 light_level)
+void CheckEventsEC20(u8 light_level,u8 get_e_para_ok)
 {
 	static u8 mirror_level = 0;
 	static time_t time_cnt = 0;
@@ -432,13 +437,18 @@ void CheckEventsEC20(u8 light_level)
 	static s8 cnt = 0;
 	static u8 first = 1;
 	u8 buf[7];
-	
+
 	if(first == 1)
 	{
 		first = 0;
-		
+
 		time_cnt = GetSysTick1s();
 		mirror_level = light_level;
+	}
+
+	if(light_level == 0)
+	{
+		return;
 	}
 
 	if(mirror_level != light_level)
@@ -450,7 +460,7 @@ void CheckEventsEC20(u8 light_level)
 		mirror_level = light_level;
 	}
 
-	if(GetSysTick1s() - time_cnt >= EventDetectConf.current_detect_delay * 60)	//等待一段时间，计算电流和电压
+	if((GetSysTick1s() - time_cnt >= EventDetectConf.current_detect_delay * 60) && get_e_para_ok == 1)	//等待一段时间，计算电流和电压
 	{
 		if(occur == 0)
 		{
@@ -480,7 +490,7 @@ void CheckEventsEC20(u8 light_level)
 				buf[2] = 0x01;
 				buf[3] = (u8)((((u16)InputCurrent) >> 8) & 0x00FF);					//发生时电流
 				buf[4] = (u8)(((u16)InputCurrent) & 0x00FF);
-				buf[5] = light_level;	
+				buf[5] = light_level;
 
 				RecordEventsECx(EVENT_ERC20,6,buf);
 			}
@@ -513,7 +523,7 @@ void CheckEventsEC20(u8 light_level)
 				buf[2] = 0x01;
 				buf[3] = (u8)((((u16)InputCurrent) >> 8) & 0x00FF);					//发生时电流
 				buf[4] = (u8)(((u16)InputCurrent) & 0x00FF);
-				buf[5] = light_level;	
+				buf[5] = light_level;
 
 				RecordEventsECx(EVENT_ERC20,6,buf);
 			}

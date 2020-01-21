@@ -191,7 +191,7 @@ void USART2_IRQHandler(void)
 		}
 		else if(strstr((const char *)ring_fifo.data, "+QLWEVTIND:3") != NULL)
 		{
-			ConnectState = ON_SERVER;
+			ConnectState = MO_DATA_ENABLED;
 		}
 		else if(strstr((const char *)ring_fifo.data, "+CEREG:0") != NULL)
 		{

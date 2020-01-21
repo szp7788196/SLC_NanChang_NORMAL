@@ -58,7 +58,7 @@ void vTaskSENSOR(void *pvParameters)
 			delay_ms(100);
 			InputPowerP 	= 0.0f - Att7053cGetChannel1PowerP();
 			delay_ms(100);
-			InputPowerQ 	= 0.0f - Att7053cGetChannel1PowerQ();
+			InputPowerQ 	= Att7053cGetChannel1PowerQ();
 			delay_ms(100);
 			InputPowerS 	= Att7053cGetChannel1PowerS();
 			delay_ms(100);
@@ -70,7 +70,7 @@ void vTaskSENSOR(void *pvParameters)
 
 //			Temperature 	= GetNTC_Temperature();
 
-			if(ConnectState == ON_SERVER)					//设备此时是在线状态
+			if(ConnectState == MO_DATA_ENABLED)					//设备此时是在线状态
 			{
 				p_tSensorMsg->in_put_current 	= (u16)(InputCurrent + 0.5f);
 				p_tSensorMsg->in_put_voltage 	= (u16)(InputVoltage + 0.5f);

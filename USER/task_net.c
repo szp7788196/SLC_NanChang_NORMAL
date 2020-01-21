@@ -38,11 +38,11 @@ void vTaskNET(void *pvParameters)
 		UploadDataStaggeredPeakInterval = DataUploadInterval 		+ FixedPeakStaggerTime;
 		HeartBeatStaggeredPeakInterval 	= HeartBeatUploadInterval 	+ FixedPeakStaggerTime;
 	}
-	
+
 //	/*******************以下为调试代码******************/
-//	RTC_Set(2019,7,20,17,33,0);	
+//	RTC_Set(2019,7,20,17,33,0);
 //	/***************************************************/
-	
+
 	bcxx_hard_init();
 
 	RE_INIT:
@@ -55,28 +55,41 @@ void vTaskNET(void *pvParameters)
 
 	while(1)
 	{
-		if(GetSysTick1s() - times_sec >= 30)			//每隔30秒钟获取一次信号强度
+		if(ConnectState == MO_DATA_ENABLED)
 		{
-			times_sec = GetSysTick1s();
-			bcxx_get_AT_CSQ(&NB_ModulePara.csq);
-			bcxx_get_AT_NUESTATS(&NB_ModulePara.rsrp,
-                                 &NB_ModulePara.rssi,
-                                 &NB_ModulePara.snr,
-                                 &NB_ModulePara.pci,
-                                 &NB_ModulePara.rsrq);
-
-			SyncDataTimeFormM53xxModule(3600);
-
-			if(ConnectState == UNKNOW_STATE)
+			if(GetSysTick1s() - times_sec >= 60)			//每隔30秒钟获取一次信号强度
 			{
-				if((err_cnt ++) >= 30)
-				{
-					goto RE_INIT;
-				}
+				times_sec = GetSysTick1s();
+				bcxx_get_AT_CSQ(&NB_ModulePara.csq);
+				bcxx_get_AT_NUESTATS(&NB_ModulePara.rsrp,
+									 &NB_ModulePara.rssi,
+									 &NB_ModulePara.snr,
+									 &NB_ModulePara.pci,
+									 &NB_ModulePara.rsrq);
+				ConnectState = bcxx_get_AT_NMSTATUS();
+
+				SyncDataTimeFormM53xxModule(3600);
 			}
-			else
+		}
+		else
+		{
+			if(GetSysTick1s() - times_sec >= 1)
 			{
-				err_cnt = 0;
+				times_sec = GetSysTick1s();
+
+				ConnectState = bcxx_get_AT_NMSTATUS();
+
+				if(ConnectState != MO_DATA_ENABLED)
+				{
+					if((err_cnt ++) >= 120)
+					{
+						goto RE_INIT;
+					}
+				}
+				else
+				{
+					err_cnt = 0;
+				}
 			}
 		}
 
@@ -90,7 +103,6 @@ void vTaskNET(void *pvParameters)
 		delay_ms(100);
 	}
 }
-
 
 //在线处理进程
 s8 OnServerHandle(void)
@@ -113,7 +125,7 @@ s8 OnServerHandle(void)
 
 		HexToStr(str_buf,outbuf,len);
 
-		if(ConnectState == ON_SERVER)
+		if(ConnectState == MO_DATA_ENABLED)
 		{
 			ret = bcxx_set_AT_QLWULDATA(len,str_buf);
 		}
@@ -135,22 +147,26 @@ s16 SendEventRequestToServer(u8 *outbuf)
 
 	if(LoginState == 0)
 	{
-		if(ConnectState == ON_SERVER)
+		if(ConnectState == MO_DATA_ENABLED)
 		{
+#ifdef CHINA_VERSION
 			if(GetSysTick1s() - times_sec2 >= LoginStaggeredPeakInterval)
+#else
+			if(GetSysTick1s() - times_sec2 >= 20)
+#endif
 			{
 				times_sec2 = GetSysTick1s();
 
 				if(RandomPeakStaggerTime != 0)	//使用随机错峰时间
 				{
-					LoginStaggeredPeakInterval 	= LOGIN_OUT_TIMEOUT + rand() % RandomPeakStaggerTime;
+					LoginStaggeredPeakInterval = LOGIN_OUT_TIMEOUT + rand() % RandomPeakStaggerTime;
 				}
 
 				send_len = CombineLogin_outFrame(1,outbuf);
 			}
 		}
 	}
-	else if(GetSysTick1s() - times_sec1 >= 20)
+	else if(GetSysTick1s() - times_sec1 >= UploadDataStaggeredPeakInterval)
 	{
 		times_sec1 = GetSysTick1s();
 		times_sec2 = GetSysTick1s();
@@ -162,7 +178,11 @@ s16 SendEventRequestToServer(u8 *outbuf)
 
 		send_len = CombineSensorDataFrame(outbuf);
 	}
+#ifdef CHINA_VERSION
 	else if(GetSysTick1s() - times_sec2 >= HeartBeatStaggeredPeakInterval)
+#else
+	else if(GetSysTick1s() - times_sec2 >= 20)
+#endif
 	{
 		times_sec2 = GetSysTick1s();
 
@@ -195,7 +215,7 @@ s16 SendEventRequestToServer(u8 *outbuf)
 			}
 		}
 	}
-	else if(EventRecordList.important_event_flag == 1)
+	else if(EventRecordList.important_event_flag != 0)
 	{
 		send_len = CombineFaultEventFrame(outbuf);
 	}
@@ -231,7 +251,7 @@ u8 SyncDataTimeFormM53xxModule(time_t sync_cycle)
 			time_s = mktime(&tm_time);
 
 			time_s += 28800;
-			
+
 #ifdef THAILAND_VERSION
 			time_s -= 3600;
 #endif

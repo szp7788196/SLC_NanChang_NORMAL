@@ -67,9 +67,9 @@
 
 #define DEVICE_TYPE					'B'			//设备类型
 
-#define CHINA_VERSION							//国内版本
+//#define CHINA_VERSION							//国内版本
 //#define THAILAND_VERSION						//泰国版本
-//#define DEBUG_VERSION							//测试版本
+#define DEBUG_VERSION							//测试版本
 
 //#define DEBUG_LOG								//是否打印调试信息
 
@@ -478,6 +478,7 @@ u8 ReadFrameWareInfo(void);
 void WriteFrameWareStateToEeprom(void);
 u8 UpdateSoftWareVer(void);
 u8 UpdateSoftWareReleaseDate(void);
+void ResetFrameWareState(void);
 u8 ReadFrameWareState(void);
 u8 ReadServerIP(void);
 u8 ReadServerPort(void);
