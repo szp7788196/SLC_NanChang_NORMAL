@@ -19,7 +19,6 @@
 #include "event_groups.h"
 
 #include <time.h>
-#include <math.h>
 
 #include "task_sensor.h"
 #include "rtc.h"
@@ -46,6 +45,12 @@
 
     typedef unsigned long long int  uint64;
     typedef long long int           int64;
+	
+
+//#define CHINA_VERSION							//国内版本
+//#define CTWING_VERSION							//国内版本
+//#define THAILAND_VERSION						//泰国版本
+#define DEBUG_VERSION							//测试版本
 
 
 #define FIRMWARE_FREE					0			//无需固件升级
@@ -63,15 +68,13 @@
 #define FIRMWARE_RUN_FLASH_BASE_ADD		0x08006000	//程序运行地址
 #define FIRMWARE_BUCKUP_FLASH_BASE_ADD	0x08043000	//程序备份地址
 #define FIRMWARE_MAX_FLASH_ADD			0x08080000	//FLSAH最大地址
+#define FIRMWARE_LAST_PAGE_ADD			0x0807F800	//FLSAH最后一页地址
 #define FIRMWARE_SIZE					FIRMWARE_BUCKUP_FLASH_BASE_ADD - FIRMWARE_RUN_FLASH_BASE_ADD
+
 
 #define DEVICE_TYPE					'B'			//设备类型
 
-//#define CHINA_VERSION							//国内版本
-//#define THAILAND_VERSION						//泰国版本
-#define DEBUG_VERSION							//测试版本
-
-//#define DEBUG_LOG								//是否打印调试信息
+#define DEBUG_LOG								//是否打印调试信息
 
 #define NEW_BOARD
 
@@ -85,7 +88,7 @@
 #define INTFC_DIGIT					2			//数字调光
 #define INTFC_DALI					3			//DALI调光
 
-#define MAX_GROUP_NUM				100			//(255 - 11 - 6 - 36) / 7
+#define MAX_GROUP_NUM				100
 
 #define MAX_UPLOAD_INVL				65535
 
@@ -190,11 +193,14 @@
 #define	TIME_STRATEGY_LEN			9
 
 
-#define ER_TIME_CONF_ADD			3501	//事件记录时间参数配置
-#define ER_TIME_CONF_LEN			7
+#define EV_TIME_CONF_ADD			3501	//事件记录时间参数配置
+#define EV_TIME_CONF_LEN			7
 
-#define ER_THRE_CONF_ADD			3508	//事件记录时间参数配置
-#define ER_THRE_CONF_LEN			18
+#define EV_THRE_CONF_ADD			3508	//事件记录时间参数配置
+#define EV_THRE_CONF_LEN			18
+
+#define EV_RECORD_REPORT_ADD		0		//事件记录/上报使能
+#define EV_RECORD_REPORT_LEN		18	
 
 #define EC1_ADD						3526	//重要事件计数器EC1
 #define EC1_LEN						3
@@ -208,6 +214,8 @@
 #define E_IMPORTEAT_ADD				3701	//重要事件记录SOE
 #define EVENT_LEN					24
 
+#define ENERGY_RECORD_ADD			140		//能耗记录
+#define ENERGY_RECORD_LEN			56	
 
 
 #define HolodayRange_S struct HolodayRange
@@ -340,6 +348,12 @@ typedef struct EventDetectConf				//事件记录配置设置数据
 	u8 leakage_over_voltage_recovery_ratio;	//单灯漏电故障事件恢复电压限值
 }EventDetectConf_S;
 
+typedef struct EventRecordConf				//事件记录配置设置数据
+{
+	u8 effective[8];						//事件记录有效标志位
+	u8 auto_report[8];						//事件主动上报标志位
+}EventRecordConf_S;
+
 typedef struct EventRecordList				//事件记录表
 {
 	u8 ec1;									//重要事件计数器
@@ -402,7 +416,12 @@ extern float FaultInputVoltage;			//发生故障时的电压
 extern u8 CalendarClock[6];
 
 extern EventDetectConf_S EventDetectConf;
+extern EventRecordConf_S EventRecordConf;
+extern long long EventEffective;
+extern long long EventReport;
 extern EventRecordList_S EventRecordList;
+
+
 
 /***************************其他*****************************/
 extern u8 GetTimeOK;								//成功获取时间标志
@@ -415,6 +434,7 @@ extern DeviceInfo_S DeviceInfo;						//设备信息
 extern FrameWareInfo_S FrameWareInfo;				//固件信息
 extern FrameWareState_S FrameWareState;				//固件升级状态
 extern IlluminanceThreshold_S IlluminanceThreshold;	//光照度阈值
+extern EnergyRecord_S EnergyRecord;					//能耗记录
 
 
 u16 MyStrstr(u8 *str1, u8 *str2, u16 str1_len, u16 str2_len);
@@ -459,6 +479,7 @@ u8 GetMemoryForSpecifyPointer(u8 **str,u16 size, u8 *memory);
 
 u8 ReadEventDetectTimeConf(void);
 u8 ReadEventDetectThreConf(void);
+u8 ReadEventRecordReportConf(void);
 u8 ReadEventRecordList(void);
 u8 ReadUpCommPortPara(void);
 u8 ReadDataUploadInterval(void);
@@ -485,6 +506,11 @@ u8 ReadServerPort(void);
 u8 ReadLampsSwitchProject(void);
 u8 ReadRegularTimeGroups(void);
 
+u8 ReadEnergyRecord(void);
+void WriteEnergyRecord(u8 reset);
+u8 ReadEnergyRecordFlash(void);
+void WriteEnergyRecordFlash(void);
+void RefreshEnergyRecord(void);
 void ReadParametersFromEEPROM(void);
 
 

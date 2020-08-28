@@ -38,11 +38,11 @@ void vTaskNET(void *pvParameters)
 		UploadDataStaggeredPeakInterval = DataUploadInterval 		+ FixedPeakStaggerTime;
 		HeartBeatStaggeredPeakInterval 	= HeartBeatUploadInterval 	+ FixedPeakStaggerTime;
 	}
-
+	
 //	/*******************以下为调试代码******************/
-//	RTC_Set(2019,7,20,17,33,0);
+//	RTC_Set(2019,7,20,17,33,0);	
 //	/***************************************************/
-
+	
 	bcxx_hard_init();
 
 	RE_INIT:
@@ -104,6 +104,7 @@ void vTaskNET(void *pvParameters)
 	}
 }
 
+
 //在线处理进程
 s8 OnServerHandle(void)
 {
@@ -149,7 +150,7 @@ s16 SendEventRequestToServer(u8 *outbuf)
 	{
 		if(ConnectState == MO_DATA_ENABLED)
 		{
-#ifdef CHINA_VERSION
+#if (defined CHINA_VERSION) || (defined CTWING_VERSION)
 			if(GetSysTick1s() - times_sec2 >= LoginStaggeredPeakInterval)
 #else
 			if(GetSysTick1s() - times_sec2 >= 20)
@@ -166,7 +167,11 @@ s16 SendEventRequestToServer(u8 *outbuf)
 			}
 		}
 	}
+#if (defined CHINA_VERSION) || (defined CTWING_VERSION)
 	else if(GetSysTick1s() - times_sec1 >= UploadDataStaggeredPeakInterval)
+#else
+	else if(GetSysTick1s() - times_sec1 >= 20)
+#endif
 	{
 		times_sec1 = GetSysTick1s();
 		times_sec2 = GetSysTick1s();
@@ -178,10 +183,10 @@ s16 SendEventRequestToServer(u8 *outbuf)
 
 		send_len = CombineSensorDataFrame(outbuf);
 	}
-#ifdef CHINA_VERSION
+#if (defined CHINA_VERSION) || (defined CTWING_VERSION)
 	else if(GetSysTick1s() - times_sec2 >= HeartBeatStaggeredPeakInterval)
 #else
-	else if(GetSysTick1s() - times_sec2 >= 20)
+	else if(GetSysTick1s() - times_sec2 >= 15)
 #endif
 	{
 		times_sec2 = GetSysTick1s();
@@ -251,7 +256,7 @@ u8 SyncDataTimeFormM53xxModule(time_t sync_cycle)
 			time_s = mktime(&tm_time);
 
 			time_s += 28800;
-
+			
 #ifdef THAILAND_VERSION
 			time_s -= 3600;
 #endif

@@ -23,6 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "common.h"
 
 
 void NMI_Handler(void)
@@ -32,6 +33,8 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* Go to infinite loop when Hard Fault exception occurs */
+	
+	WriteEnergyRecordFlash();
 
 	__disable_fault_irq();
 	NVIC_SystemReset();

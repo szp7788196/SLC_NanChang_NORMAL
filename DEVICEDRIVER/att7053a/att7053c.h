@@ -7,6 +7,7 @@
 #define REG_WPC			0x32		//写保护
 #define REG_FREQ_CFG	0x41		//配置寄存器
 #define REG_ANAEN		0x43		//ADC开关配置
+#define REG_ADCCON		0x59		//ADC增益通道
 #define REG_V_RMS		0x08		//电压有效值
 #define REG_FREQ		0x09		//电网频率
 #define REG_C_RMS		0x06		//电流有效值
@@ -15,13 +16,14 @@
 #define REG_POWER_S		0x0C		//视在功率
 #define REG_ENENRGY_P	0x0D		//有功能耗
 #define REG_ENENRGY_Q	0x0E		//无功能耗
+#define REG_EMUCFG		0x40		//EMU配置寄存器
 #define REG_WAVE_BUF	0x7F		//波形缓存
 
 
 #define POWER_RATIO						0.01777947713f		//功率转换系数
-#define ELECTRIC_ENERGY_METER_CONSTANT	3200.0f				//电能转换系数
+#define ELECTRIC_ENERGY_METER_CONSTANT	6400.0f				//电能转换系数
 #define CURRENT_RATIO					0.01144472f			//电流转换系数
-#define VOLTAGE_RATIO					0.00019195212f		//电压转换系数
+#define VOLTAGE_RATIO					0.000193780687f		//电压转换系数
 
 
 void ATT7053C_Init(void);
@@ -31,8 +33,8 @@ float Att7053cGetCurrent(void);
 float Att7053cGetChannel1PowerP(void);
 float Att7053cGetChannel1PowerQ(void);
 float Att7053cGetChannel1PowerS(void);
-float Att7053cGetEnergyP(void);
-float Att7053cGetEnergyQ(void);
+double Att7053cGetEnergyP(void);
+double Att7053cGetEnergyQ(void);
 void Att7053cGetSamplingSequence(u8 type,float *buf,u8 len);
 
 

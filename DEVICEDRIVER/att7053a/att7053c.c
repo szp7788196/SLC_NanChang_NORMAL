@@ -9,6 +9,11 @@ void ATT7053C_Init(void)
 	
 	SPI_Write(REG_WPC, 0x00BC); //打开写保护
 	SPI_Write(REG_ANAEN, 0x0007); //打开ADC2
+//	SPI_Write(REG_WPC, 0x00BC); //打开写保护
+//	SPI_Write(REG_EMUCFG, 0x0200); //能耗读后清零
+	
+	SPI_Write(REG_WPC, 0x00A6); //打开写保护
+	SPI_Write(REG_ADCCON, 0x0000); //打开ADC2
 	
 	delay_ms(200);
 }
@@ -108,27 +113,27 @@ float Att7053cGetChannel1PowerS(void)
 }
 
 //读取有功电能
-float Att7053cGetEnergyP(void)
+double Att7053cGetEnergyP(void)
 {
-	static float energy_p = 0;
+	static double energy_p = 0;
 	s32 value = 0;
 
 	value = SPI_Read(REG_ENENRGY_P);
 
-	energy_p = (float)value * ELECTRIC_ENERGY_METER_CONSTANT;
+	energy_p = (double)value / ELECTRIC_ENERGY_METER_CONSTANT;
 
 	return energy_p;
 }
 
 //读取无功电能
-float Att7053cGetEnergyQ(void)
+double Att7053cGetEnergyQ(void)
 {
-	static float energy_q = 0;
+	static double energy_q = 0;
 	s32 value = 0;
 
 	value = SPI_Read(REG_ENENRGY_Q);
 
-	energy_q = (float)value * ELECTRIC_ENERGY_METER_CONSTANT;
+	energy_q = (double)value / ELECTRIC_ENERGY_METER_CONSTANT;
 
 	return energy_q;
 }

@@ -7,11 +7,11 @@
 #include "uart4.h"
 #include "pwm.h"
 #include "dac.h"
-#include "att7059x.h"
 #include "inventr.h"
 #include "dali.h"
 #include "cd4051b.h"
 #include "ntc.h"
+#include "bcxx.h"
 
 u16 i = 0;
 u8 eepbuf[256];
@@ -33,6 +33,7 @@ int main(void)
 	RTC_Init();
 	AT24CXX_Init();
 	DAC1_Init();
+	PVD_Init();
 //	ADC1_DMA1_Init();
 	LED_Init();
 	RELAY_Init();
